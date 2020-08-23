@@ -19,4 +19,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('/upload','OfferController@uploadFile')->name('offers.upload');
+Route::get('/obtem-documento', 'OffersController@generateLinkToDownload')->name('offers.download');
 Route::get('/bairros', 'BairroController@getPlace')->name('places.get');

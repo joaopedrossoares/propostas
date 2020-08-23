@@ -8,12 +8,12 @@ use Illuminate\Support\Facades\Storage;
 class OfferController extends Controller
 {
 
-  private function saveFile($uploadedFile, $filename, $path)
+  private function saveFile($uploadedFile, $filename, $path, $firebaseId)
   {
     try {
       
       Storage::disk('s3')->putFileAs(
-        $path . $filename,
+        $path . $firebaseId,
         $uploadedFile,
         $filename
       );
@@ -34,8 +34,9 @@ class OfferController extends Controller
   private function getRequestedFile($request, $nameParam)
   {
     $uploadedFile = $request->file($nameParam);
-    $filename = time() . $uploadedFile->getClientOriginalName();
-    $this->saveFile($uploadedFile, $filename, 'files/');
+    $firebaseId = $request->id;
+    $filename = $uploadedFile->getClientOriginalName();
+    $this->saveFile($uploadedFile, $filename, 'files/', $firebaseId);
   }
 
   public function uploadFile(Request $request)
@@ -55,5 +56,13 @@ class OfferController extends Controller
         $this->getRequestedFile($request, $value);
       }
     }
+  }
+
+  public function generateLinkToDownload(Request $request) {
+     $region = env('AWS_DEFAULT_REGION');
+     $bucket = env('AWS_BUCKET');
+     $firebaseId = $request->id;
+     $filename = $request->filename;
+     return "https://s3.$region.amazonaws.com/$bucket/files/$firebaseId/$filename";
   }
 }
